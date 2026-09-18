@@ -44,12 +44,13 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col unselectable" id="appBody">
 
+    <!-- HEADER -->
     <header class="bg-gradient-to-r from-blue-950 via-indigo-900 to-slate-900 text-white shadow-xl sticky top-0 z-30 border-b border-indigo-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
             <div class="flex items-center space-x-4 text-left">
                 <div class="relative">
-                    <img id="headerLogo" src="https://placehold.co/100x100/1e3a8a/ffffff?text=GES+LOGO" alt="College Logo" 
-                         onerror="this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=GES+LOGO'" 
+                    <img id="headerLogo" src="logo.ico" alt="College Logo" 
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=GES+LOGO';" 
                          class="h-14 w-14 object-contain rounded-full bg-white p-1 border-2 border-indigo-300 shadow">
                 </div>
                 <div>
@@ -66,6 +67,7 @@
         </div>
     </header>
 
+    <!-- MAIN CONTAINER -->
     <main class="flex-grow flex flex-col max-w-7xl w-full mx-auto p-3 sm:p-6">
 
         <!-- STATE 1: LINK STATUS OFF / EXAM WINDOW CLOSED CARD -->
@@ -171,6 +173,25 @@
 
     </main>
 
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-300 text-xs py-4 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div>
+                <p class="font-bold text-white flex items-center justify-center sm:justify-start gap-1.5">
+                    <i class="fa-solid fa-microchip text-indigo-400"></i> Powered by <span class="text-amber-400">Pharma2Tech Systems Pvt Ltd</span>
+                </p>
+                <p class="text-[11px] text-slate-400 italic font-medium">"Where Pharmacy Meets Technology"</p>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] font-medium">
+                <a href="mailto:support@pharma2tech.in" class="hover:text-amber-400 transition flex items-center gap-1.5 text-indigo-300">
+                    <i class="fa-regular fa-envelope"></i> support@pharma2tech.in
+                </a>
+                <span class="text-slate-600">|</span>
+                <span class="text-slate-400">© 2026 All Rights Reserved</span>
+            </div>
+        </div>
+    </footer>
+
     <!-- PROCTORING WARNING MODAL -->
     <div id="warningModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-2 border-red-500 text-center">
@@ -195,7 +216,7 @@
         const STORAGE_KEY = 'equiz_portal_config_v2';
         const syncChannel = new BroadcastChannel('equiz_sync_channel');
 
-        // YOUR FIREBASE REALTIME DATABASE CONFIGURATION
+        // YOUR LIVE FIREBASE REALTIME DATABASE CONFIGURATION
         const firebaseConfig = {
             databaseURL: "https://equiz-portal-a9f6a-default-rtdb.firebaseio.com"
         };
@@ -216,7 +237,7 @@
             collegeName: "G.E.S. COLLEGE OF PHARMACY (D.PHARM)",
             collegeSubtitle: "Limb, Satara - Approved by PCI & DTE Maharashtra",
             quizTitle: "STATE LEVEL E-QUIZ COMPETITION",
-            logoUrl: "https://placehold.co/100x100/1e3a8a/ffffff?text=GES+LOGO",
+            logoUrl: "logo.ico",
             formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeu6-3-J42VzC7-11-demo-form/viewform?embedded=true",
             durationMinutes: 15,
             adminPassword: "admin123",
@@ -295,7 +316,9 @@
             document.getElementById('headerQuizTitle').innerText = config.quizTitle || DEFAULT_CONFIG.quizTitle;
             
             const logoEl = document.getElementById('headerLogo');
-            if (logoEl) logoEl.src = config.logoUrl || DEFAULT_CONFIG.logoUrl;
+            if (logoEl) {
+                logoEl.src = config.logoUrl || DEFAULT_CONFIG.logoUrl;
+            }
         }
 
         function evaluateStudentPortalState() {
