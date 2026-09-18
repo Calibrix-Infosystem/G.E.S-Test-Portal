@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Level E-Quiz - Admin Control Center</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl sticky top-0 z-30 border-b border-indigo-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-xl border border-amber-500/30">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-black tracking-wide text-white uppercase">E-Quiz Admin Control Center</h1>
+                    <p class="text-xs text-indigo-200">Real-time Live Sync Management System</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> Live Portal Broadcaster Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- ADMIN LOGIN CARD -->
+        <div id="adminLoginCard" class="bg-white rounded-2xl shadow-xl p-8 border border-slate-200 max-w-md mx-auto w-full">
+            <div class="w-16 h-16 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl border border-indigo-200">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-2xl font-black text-center text-slate-900 mb-1">Admin Panel Login</h3>
+            <p class="text-xs text-center text-slate-500 mb-6">Enter admin password to manage competition parameters.</p>
+            
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Password</label>
+                    <input type="password" id="adminPasswordInput" placeholder="Default: admin123" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                </div>
+                <div id="loginError" class="text-xs text-red-600 font-bold hidden bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i> Incorrect password. Default: <b>admin123</b>
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm shadow-lg transition transform active:scale-95">
+                    Sign In to Control Panel
+                </button>
+            </form>
+        </div>
+
+        <!-- ADMIN DASHBOARD PANEL -->
+        <div id="adminDashboard" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-5 rounded-2xl shadow border border-slate-200 gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-600"></i> Master Test Configuration
+                    </h2>
+                    <p class="text-xs text-slate-500">Settings saved here broadcast instantly to all connected student screens.</p>
+                </div>
+                <button onclick="adminLogout()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Exit Admin
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6 sm:p-8 border border-slate-200">
+                    <form onsubmit="saveAdminSettings(event)" class="space-y-5 text-sm">
+                        
+                        <!-- Link Status Toggle -->
+                        <div class="bg-indigo-50/80 p-4 rounded-xl border border-indigo-200 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-indigo-950 text-base">Master Link Status (ON / OFF)</h4>
+                                <p class="text-xs text-indigo-700">Turn OFF to lock student portals immediately with "Exam Window Closed".</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="cfgLinkStatus" class="sr-only peer" checked>
+                                <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- Schedule Settings -->
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                                <i class="fa-regular fa-calendar-days text-indigo-600"></i> Exam Schedule Window
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-xs text-slate-700 mb-1">Start Date & Time</label>
+                                    <input type="datetime-local" id="cfgStartTime" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-xs text-slate-700 mb-1">End Date & Time</label>
+                                    <input type="datetime-local" id="cfgEndTime" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- General Branding Settings -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">College Name</label>
+                                <input type="text" id="cfgCollegeName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">Subtitle / Location</label>
+                                <input type="text" id="cfgCollegeSubtitle" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">Competition / Test Title</label>
+                                <input type="text" id="cfgQuizTitle" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">College Logo Image URL</label>
+                                <input type="url" id="cfgLogoUrl" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-xs text-slate-700 mb-1">Google Form Embed URL</label>
+                            <input type="url" id="cfgFormUrl" required placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">Exam Duration (Minutes)</label>
+                                <input type="number" id="cfgDuration" min="1" max="300" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-xs text-slate-700 mb-1">Change Admin Password</label>
+                                <input type="password" id="cfgNewPassword" placeholder="Leave blank to keep current" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                            </div>
+                        </div>
+
+                        <div class="pt-3 flex items-center gap-3">
+                            <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Broadcast Live Updates
+                            </button>
+                            <button type="button" onclick="restoreDefaultSettings()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border border-slate-300 transition">
+                                Restore Defaults
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white rounded-2xl shadow p-5 border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-500"></i> Quick Actions
+                        </h3>
+                        <p class="text-xs text-slate-500">Use this button to reset exam parameter presets.</p>
+                        <button onclick="restoreDefaultSettings()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+                        </button>
+                    </div>
+
+                    <div class="bg-indigo-900 text-white rounded-2xl shadow p-5 border border-indigo-800 space-y-2">
+                        <h4 class="font-bold text-sm flex items-center gap-2 text-amber-400">
+                            <i class="fa-solid fa-circle-info"></i> Instant Sync Active
+                        </h4>
+                        <p class="text-xs text-indigo-200 leading-relaxed">
+                            When you click <strong>Broadcast Live Updates</strong>, changes sync instantly to <code>index.html</code> across tabs using localStorage & BroadcastChannel!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- NOTIFICATION MODAL -->
+    <div id="noticeModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center border border-slate-200">
+            <div id="noticeIcon" class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl border border-emerald-200">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="noticeTitle" class="text-lg font-black text-slate-900 mb-1">Notification</h3>
+            <p id="noticeMessage" class="text-xs text-slate-600 mb-5">Operation successful.</p>
+            <button onclick="closeNoticeModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'equiz_portal_config_v2';
+        const syncChannel = new BroadcastChannel('equiz_sync_channel');
+
+        const now = new Date();
+        const defaultStartTime = new Date(now.getTime() - 5 * 60000).toISOString().slice(0, 16);
+        const defaultEndTime = new Date(now.getTime() + 2 * 3600000).toISOString().slice(0, 16);
+
+        const DEFAULT_CONFIG = {
+            collegeName: "G.E.S. COLLEGE OF PHARMACY (D.PHARM)",
+            collegeSubtitle: "Limb, Satara - Approved by PCI & DTE Maharashtra",
+            quizTitle: "STATE LEVEL E-QUIZ COMPETITION",
+            logoUrl: "https://placehold.co/100x100/1e3a8a/ffffff?text=GES+LOGO",
+            formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeu6-3-J42VzC7-11-demo-form/viewform?embedded=true",
+            durationMinutes: 15,
+            adminPassword: "admin123",
+            linkStatus: true,
+            startTime: defaultStartTime,
+            endTime: defaultEndTime
+        };
+
+        let config = { ...DEFAULT_CONFIG };
+
+        window.addEventListener('load', () => {
+            loadConfig();
+        });
+
+        function loadConfig() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    config = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+                } else {
+                    config = { ...DEFAULT_CONFIG };
+                }
+            } catch (e) {
+                config = { ...DEFAULT_CONFIG };
+            }
+            populateAdminForm();
+        }
+
+        function populateAdminForm() {
+            document.getElementById('cfgLinkStatus').checked = config.linkStatus !== undefined ? config.linkStatus : true;
+            document.getElementById('cfgStartTime').value = config.startTime || defaultStartTime;
+            document.getElementById('cfgEndTime').value = config.endTime || defaultEndTime;
+            document.getElementById('cfgCollegeName').value = config.collegeName || DEFAULT_CONFIG.collegeName;
+            document.getElementById('cfgCollegeSubtitle').value = config.collegeSubtitle || DEFAULT_CONFIG.collegeSubtitle;
+            document.getElementById('cfgQuizTitle').value = config.quizTitle || DEFAULT_CONFIG.quizTitle;
+            document.getElementById('cfgLogoUrl').value = config.logoUrl || DEFAULT_CONFIG.logoUrl;
+            document.getElementById('cfgFormUrl').value = config.formUrl || DEFAULT_CONFIG.formUrl;
+            document.getElementById('cfgDuration').value = config.durationMinutes || 15;
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const entered = document.getElementById('adminPasswordInput').value.trim();
+            const valid = config.adminPassword || DEFAULT_CONFIG.adminPassword;
+
+            if (entered === valid) {
+                document.getElementById('loginError').classList.add('hidden');
+                document.getElementById('adminLoginCard').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                document.getElementById('adminPasswordInput').value = '';
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('adminLoginCard').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function saveAdminSettings(e) {
+            e.preventDefault();
+            config.linkStatus = document.getElementById('cfgLinkStatus').checked;
+            config.startTime = document.getElementById('cfgStartTime').value;
+            config.endTime = document.getElementById('cfgEndTime').value;
+            config.collegeName = document.getElementById('cfgCollegeName').value;
+            config.collegeSubtitle = document.getElementById('cfgCollegeSubtitle').value;
+            config.quizTitle = document.getElementById('cfgQuizTitle').value;
+            config.logoUrl = document.getElementById('cfgLogoUrl').value;
+            config.formUrl = document.getElementById('cfgFormUrl').value;
+            config.durationMinutes = parseInt(document.getElementById('cfgDuration').value, 10);
+
+            const newPass = document.getElementById('cfgNewPassword').value.trim();
+            if (newPass.length > 0) {
+                config.adminPassword = newPass;
+                document.getElementById('cfgNewPassword').value = '';
+            }
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+                syncChannel.postMessage({ type: 'CONFIG_UPDATED', config: config });
+                showNotice("Success!", "Settings updated & synchronized instantly across all student screens!");
+            } catch (err) {
+                showNotice("Error", "Could not save settings locally.");
+            }
+        }
+
+        function restoreDefaultSettings() {
+            config = { ...DEFAULT_CONFIG };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+            syncChannel.postMessage({ type: 'CONFIG_UPDATED', config: config });
+            populateAdminForm();
+            showNotice("Defaults Restored", "All parameters have been reset to default values.");
+        }
+
+        function showNotice(title, message) {
+            document.getElementById('noticeTitle').innerText = title;
+            document.getElementById('noticeMessage').innerText = message;
+            document.getElementById('noticeModal').classList.remove('hidden');
+        }
+
+        function closeNoticeModal() {
+            document.getElementById('noticeModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
