@@ -11,10 +11,6 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDK (Version 9 Compat for Realtime Cloud Sync) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
     <style>
         .unselectable {
             -webkit-user-select: none;
@@ -213,40 +209,36 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'equiz_portal_config_v2';
-        const syncChannel = new BroadcastChannel('equiz_sync_channel');
-
-        // YOUR LIVE FIREBASE REALTIME DATABASE CONFIGURATION
-        const firebaseConfig = {
-            databaseURL: "https://equiz-portal-a9f6a-default-rtdb.firebaseio.com"
-        };
-
-        let dbRef = null;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            dbRef = firebase.database().ref("quiz_config");
-        } catch (e) {
-            console.log("Firebase fallback mode initialized");
-        }
-
-        const now = new Date();
-        const defaultStartTime = new Date(now.getTime() - 5 * 60000).toISOString().slice(0, 16);
-        const defaultEndTime = new Date(now.getTime() + 2 * 3600000).toISOString().slice(0, 16);
-
-        const DEFAULT_CONFIG = {
+        /* 
+           ========================================================================
+           MANUAL CONFIGURATION AREA (GITHUB / INDEX.HTML वरून थेट बदल करण्यासाठी)
+           ========================================================================
+        */
+        const CONFIG = {
+            // १. कॉलेज आणि क्विझ नाव
             collegeName: "G.E.S. COLLEGE OF PHARMACY (D.PHARM)",
             collegeSubtitle: "Limb, Satara - Approved by PCI & DTE Maharashtra",
             quizTitle: "STATE LEVEL E-QUIZ COMPETITION",
             logoUrl: "logo.ico",
+
+            // २. इथं तुमचा Google Form URL पेस्ट करा (embedded=true ठेवा)
             formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeu6-3-J42VzC7-11-demo-form/viewform?embedded=true",
+
+            // ३. परीक्षा कालावधी (मिनिटांमध्ये)
             durationMinutes: 15,
-            adminPassword: "admin123",
+
+            // ४. linkStatus: true म्हणजे परीक्षा चालू, false म्हणजे बंद/Lock
             linkStatus: true,
-            startTime: defaultStartTime,
-            endTime: defaultEndTime
+
+            // ५. परीक्षेची सुरुवातीची वेळ आणि तारीख (Format: YYYY-MM-DDTHH:MM)
+            startTime: "2026-09-24T10:00", 
+
+            // ६. परीक्षेची शेवटची वेळ आणि तारीख (Format: YYYY-MM-DDTHH:MM)
+            endTime: "2026-09-25T18:00"
         };
 
-        let config = { ...DEFAULT_CONFIG };
+        /* ======================================================================== */
+
         let testRunning = false;
         let testPaused = false;
         let testFinished = false;
@@ -258,66 +250,20 @@
         let isIframeHovered = false;
 
         window.addEventListener('load', () => {
-            loadConfig();
-            setupFirebaseListener();
-            setupSyncListeners();
+            updateUIBranding();
             setupAntiCheatingListeners();
+            evaluateStudentPortalState();
             setInterval(evaluateStudentPortalState, 1000);
         });
 
-        function setupFirebaseListener() {
-            if (dbRef) {
-                dbRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        config = { ...DEFAULT_CONFIG, ...data };
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-                        updateUIBranding();
-                        evaluateStudentPortalState();
-                    }
-                });
-            }
-        }
-
-        function loadConfig() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    config = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
-                } else {
-                    config = { ...DEFAULT_CONFIG };
-                }
-            } catch (e) {
-                config = { ...DEFAULT_CONFIG };
-            }
-            updateUIBranding();
-            evaluateStudentPortalState();
-        }
-
-        function setupSyncListeners() {
-            syncChannel.onmessage = (event) => {
-                if (event.data && event.data.type === 'CONFIG_UPDATED') {
-                    config = { ...DEFAULT_CONFIG, ...event.data.config };
-                    updateUIBranding();
-                    evaluateStudentPortalState();
-                }
-            };
-
-            window.addEventListener('storage', (e) => {
-                if (e.key === STORAGE_KEY) {
-                    loadConfig();
-                }
-            });
-        }
-
         function updateUIBranding() {
-            document.getElementById('headerCollegeName').innerText = config.collegeName || DEFAULT_CONFIG.collegeName;
-            document.getElementById('headerCollegeSubtitle').innerText = config.collegeSubtitle || DEFAULT_CONFIG.collegeSubtitle;
-            document.getElementById('headerQuizTitle').innerText = config.quizTitle || DEFAULT_CONFIG.quizTitle;
+            document.getElementById('headerCollegeName').innerText = CONFIG.collegeName;
+            document.getElementById('headerCollegeSubtitle').innerText = CONFIG.collegeSubtitle;
+            document.getElementById('headerQuizTitle').innerText = CONFIG.quizTitle;
             
             const logoEl = document.getElementById('headerLogo');
             if (logoEl) {
-                logoEl.src = config.logoUrl || DEFAULT_CONFIG.logoUrl;
+                logoEl.src = CONFIG.logoUrl;
             }
         }
 
@@ -329,18 +275,18 @@
             const cardStart = document.getElementById('cardStartTest');
 
             const nowTime = Date.now();
-            const startTime = new Date(config.startTime).getTime();
-            const endTime = new Date(config.endTime).getTime();
+            const startTime = new Date(CONFIG.startTime).getTime();
+            const endTime = new Date(CONFIG.endTime).getTime();
 
             // Condition 1: Master Link Status OFF or Exam Window Expired
-            if (!config.linkStatus || nowTime >= endTime) {
+            if (!CONFIG.linkStatus || nowTime >= endTime) {
                 cardClosed.classList.remove('hidden');
                 cardUpcoming.classList.add('hidden');
                 cardStart.classList.add('hidden');
 
                 const closedText = document.getElementById('closedReasonText');
-                if (!config.linkStatus) {
-                    closedText.innerHTML = 'The e-quiz competition link is currently turned <span class="text-red-600 font-bold">OFF</span> by the administrator.';
+                if (!CONFIG.linkStatus) {
+                    closedText.innerHTML = 'The e-quiz competition link is currently turned <span class="text-red-600 font-bold">OFF</span>.';
                 } else {
                     closedText.innerText = 'The examination schedule window has concluded.';
                 }
@@ -363,7 +309,7 @@
                 document.getElementById('cntHours').innerText = String(h).padStart(2, '0');
                 document.getElementById('cntMins').innerText = String(m).padStart(2, '0');
                 document.getElementById('cntSecs').innerText = String(s).padStart(2, '0');
-                document.getElementById('scheduleStartText').innerText = new Date(config.startTime).toLocaleString();
+                document.getElementById('scheduleStartText').innerText = new Date(CONFIG.startTime).toLocaleString();
                 return;
             }
 
@@ -386,9 +332,9 @@
             document.getElementById('activeTestContainer').classList.remove('hidden');
 
             const formIframe = document.getElementById('googleFormIframe');
-            formIframe.src = config.formUrl;
+            formIframe.src = CONFIG.formUrl;
 
-            timeRemainingSeconds = (config.durationMinutes || 15) * 60;
+            timeRemainingSeconds = (CONFIG.durationMinutes || 15) * 60;
             startCountdownTimer();
         }
 
